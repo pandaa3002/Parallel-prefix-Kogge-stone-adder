@@ -1,0 +1,71 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 25.08.2026 18:50:06
+// Design Name: 
+// Module Name: Kogge_stone_adder
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module Kogge_stone_adder(
+ a,b,cin,s,cout
+    );
+    input[3:0] a,b;
+    input cin;
+    output[3:0] s;
+    wire[3:0] c;
+    output cout;
+    wire[3:0] G;
+    wire[3:0] P;
+    wire[3:0] G1,P1,G2,P2;
+    
+    begin
+    assign G=a&b;// AND(a,b)
+    assign P=a^b; //XOR(a,b)
+    
+    assign G1[0]=G[0];
+    assign P1[0]=P[0];
+    
+    // Prefix 1
+    assign G1[1]=G[1]|(P[1]&G[0]); //for group G10
+    assign P1[1]=P[1]&P[0];// for group P10
+    assign G1[2]=G[2]|(P[2]&G[1]);//for group G21
+    assign P1[2]=P[2]&P[1];// for group P21
+    assign G1[3]=G[3]|(P[3]&G[2]);// for group G32
+    assign P1[3]=P[3]&P[2];// for group P32
+    
+    // Prefix 2 (for grouping for 2 bits)
+    assign G2[0]=G1[0];
+    assign P2[0]=P1[0];
+    assign G2[1]=G1[1];
+    assign P2[1]=P1[1];
+    assign G2[2]=G1[2] |(P1[2]&G1[0]);//for group G210
+    assign P2[2]=P1[2]&P1[0];// for group P210
+    assign G2[3]=G1[3]|(P1[3]&G1[1]);//For group G3210
+    assign P2[3]=P1[3]&P1[1];//for group P3210
+    
+    assign c[0]=cin;
+    assign c[1]=G[0]|(P[0]&c[0]);
+    assign c[2]=G1[1]|(P1[1]&c[0]);
+    assign c[3]=G2[2]|(P2[2]&c[0]);
+    assign cout=G2[3]|(P2[3]&c[0]);
+    
+    assign s[0]=P[0]^cin;
+    assign s[1]=P[1]^c[1];
+    assign s[2]=P[2]^c[2];
+    assign s[3]=P[3]^c[3]; 
+  end  
+  endmodule
